@@ -5,6 +5,7 @@ from fastapi import FastAPI
 
 app = FastAPI()
 
+# 동기 방식 처리
 def syncTask(name):
     print('Sync task:', name)
     time.sleep(1)
@@ -20,6 +21,7 @@ def syncRun():
 
 import asyncio
 
+# 비동기 방식 처리
 async def asyncTask(name):
     print('Async task:', name)
     await asyncio.sleep(1)
