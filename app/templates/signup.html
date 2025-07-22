@@ -10,6 +10,8 @@
             <input type="text" id="username_input" placeholder="이메일 주소">
             <label for="password_input">패스워드</label>
             <input type="password" id="password_input">
+            <label for="picture_input">프로필사진</label>
+            <input type="file" id="picture_input">
         </div>
         <div id="signup_button_div">
             <button id="submit_button">전송</button>
@@ -17,30 +19,44 @@
         </div>
     </body>
     <script>
+        const homeURL = '/home';
         const usernameInput = document.querySelector('#username_input');
         const passwordInput = document.querySelector('#password_input');
+        const pictureInput = document.querySelector('#picture_input');
 
-        // send username, password
+        // username, password, picture(file)
         async function sendRequest() {
+            const pictureFile = pictureInput.files[0]
 
-            const headers = {"Content-Type": 'application/json; charset=utf-8'};
-            const jsonData = {
-                "username": usernameInput.value
-                , "password": passwordInput.value
-            };
-        
+            const reqBody = new FormData();
+
+            if (typeof pictureFile == 'undefined') {
+                reqBody.set("username", usernameInput.value);
+                reqBody.set("password", passwordInput.value);
+            }
+            else {
+                reqBody.set("username", usernameInput.value);
+                reqBody.set("password", passwordInput.value);
+                reqBody.set("picture", pictureFile);
+            }
+
+            console.log('signup.html.sendRequest().reqBody:', reqBody);
+
             const response = await fetch(
                 '/user/signup'
                 , {
                     "method": 'POST'
-                    , "headers": headers
-                    , "body": JSON.stringify(jsonData)
+                    , "body": reqBody
                 }
             );
 
-            const respJSON = await response.json();
+            const jsonResp = await response.json();
 
-            console.log('signup.html.sendRequest().respJSON:', respJSON);
+            console.log('signup.html.sendRequest().jsonResp:', jsonResp);
+
+            if (jsonResp["success"] == true){
+                window.location.replace(homeURL);           
+            }
         }
 
         const submitButton = document.querySelector('#submit_button');
@@ -48,7 +64,6 @@
 
         submitButton.addEventListener('click', sendRequest);
         cancelButton.addEventListener('click', () => {
-            const homeURL = '/home';
             window.location.replace(homeURL);           
         });
     </script>
