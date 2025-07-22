@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Signup</title> 
+    </head>
+    <body>
+        <div id="signup_input_div">
+            <label for="username_input">이름</label>
+            <input type="text" id="username_input" placeholder="이메일 주소">
+            <label for="password_input">패스워드</label>
+            <input type="password" id="password_input">
+        </div>
+        <div id="signup_button_div">
+            <button id="submit_button">전송</button>
+            <button id="cancel_button">취소</button>
+        </div>
+    </body>
+    <script>
+        const usernameInput = document.querySelector('#username_input');
+        const passwordInput = document.querySelector('#password_input');
+
+        // send username, password
+        async function sendRequest() {
+
+            const headers = {"Content-Type": 'application/json; charset=utf-8'};
+            const jsonData = {
+                "username": usernameInput.value
+                , "password": passwordInput.value
+            };
+        
+            const response = await fetch(
+                '/user/signup'
+                , {
+                    "method": 'POST'
+                    , "headers": headers
+                    , "body": JSON.stringify(jsonData)
+                }
+            );
+
+            const respJSON = await response.json();
+
+            console.log('signup.html.sendRequest().respJSON:', respJSON);
+        }
+
+        const submitButton = document.querySelector('#submit_button');
+        const cancelButton = document.querySelector('#cancel_button');
+
+        submitButton.addEventListener('click', sendRequest);
+        cancelButton.addEventListener('click', () => {
+            const homeURL = '/home';
+            window.location.replace(homeURL);           
+        });
+    </script>
+</html>
