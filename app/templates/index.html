@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="/static/css/index.css">
+        <title>FastApi-Review</title> 
+    </head>
+    <body>
+        <div id="message">
+            <p>Hello, FastAPI.</p>
+        </div>
+        <div id="link_signup_div">
+            <a id="link_signup_a" href="/user/signup">Signup</a>
+        </div>
+        <div id="link_login_div">
+            <a id="link_login_a" href="/user/login">Login</a>
+        </div>
+        <div id="link_reset_password_div">
+            <a id="link_reset_password_a" href="/user/resetpw">Reset password</a>
+        </div>
+        <div id="link_update_userinfo_div">
+        </div>
+    </body>
+    <script>
+            const accessToken = sessionStorage.getItem("access_token");
+            const linkSignupDiv = document.querySelector("#link_signup_div");
+            const linkloginDiv = document.querySelector("#link_login_div");
+            const linkUpdateUserinfoDiv = document.querySelector("#link_update_userinfo_div");
+            const linkResetPasswordDiv = document.querySelector("#link_reset_password_div");
+
+            if (accessToken) {
+                console.log('index.html.accessToken:', accessToken);
+
+                const linkSignupA = document.querySelector("#link_signup_a");
+                if (linkSignupA) {
+                    linkSignupDiv.removeChild(linkSignupA);
+                }
+
+                const linkLoginA = document.querySelector("#link_login_a");
+                if (linkLoginA) {
+                    linkloginDiv.removeChild(linkLoginA);
+                }
+
+                const linkResetPasswordA = document.querySelector("#link_reset_password_a")
+                if (linkResetPasswordA) {
+                    linkResetPasswordDiv.removeChild(linkResetPasswordA);
+                }
+
+                let linkLogoutA = document.querySelector("#link_logout_a");
+                if (!linkLogoutA) {
+                    linkLogoutA = document.createElement("a");
+                    linkLogoutA.setAttribute("id", "link_logout_a");
+                    linkLogoutA.setAttribute("href", "/user/logout");
+                    linkLogoutA.appendChild(document.createTextNode("Logout"));
+                    linkloginDiv.appendChild(linkLogoutA);
+                }
+
+                let linkUpdateUserinfoA = document.querySelector("#link_update_userinfo_a");
+                if (!linkUpdateUserinfoA) {
+                    linkUpdateUserinfoA = document.createElement("a");
+                    linkUpdateUserinfoA.setAttribute("id", "link_update_userinfo_a");
+                    linkUpdateUserinfoA.setAttribute("href", "/user/updateinfo");
+                    linkUpdateUserinfoA.appendChild(document.createTextNode("Update user info"))
+                    linkUpdateUserinfoDiv.appendChild(linkUpdateUserinfoA);
+                }
+            }
+            else {  // no access token
+                const linkLogoutA = document.querySelector("#link_logout_a");
+                if (linkLogoutA) {
+                    linkloginDiv.removeChild(linkLogoutA);
+                }
+
+                let linkLoginA = document.querySelector("#link_login_a");
+                if (!linkLoginA) {
+                    linkLoginA = document.createElement("a");
+                    linkLoginA.setAttribute("id", "link_login_a");
+                    linkLoginA.setAttribute("href", "/user/login");
+                    linkLoginA.appendChild(document.createTextNode("Login"));
+                    linkLoginP.appendChild(linkLoginA);
+                }
+
+                const linkUpdateUserinfoA = document.querySelector("#link_update_userinfo_a");
+                if (linkUpdateUserinfoA) {
+                    linkUpdateUserinfoDiv.removeChild(linkUpdateUserinfoA);
+                }
+
+                let linkResetPasswordA = document.querySelector("#link_reset_password_a");
+                if (!linkResetPasswordA) {
+                    linkResetPasswordA = document.createElement("a");
+                    linkResetPasswordA.setAttribute("id", "link_reset_password_a");
+                    linkResetPasswordA.setAttribute("href", "/user/resetpw");
+                    linkResetPasswordA.appendChild(document.createTextNode("Reset password"));
+                    linkResetPasswordDiv.appendChild(linkResetPasswordA);
+                }
+            }
+    </script>
+</html>
