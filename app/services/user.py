@@ -68,3 +68,66 @@ class User():
             return jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
         except JWTError:
             return None
+
+    async def verifyUserById(self, id, password):
+        query = loadQuery("get_userinfo_by_id.sql")
+
+        async with self.pool.acquire() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute(query, (id))
+                userinfo = await cur.fetchone()
+
+                if userinfo:
+                    check = verify(password, userinfo[2]) 
+                else:
+                    check = False               
+
+                if check:
+                    result = userinfo
+                else:
+                    result = None
+
+        return result
+    
+    async def updateUserinfo(self, password, id):
+    
+        async with self.pool.acquire() as conn:
+            async with conn.cursor() as cur:
+                query = loadQuery('get_userinfo_by_id.sql')
+    
+                await cur.execute(query, (id))
+                userinfo = cur.fetchone()
+    
+                if userinfo is None:    # no user with given id
+                    result = None
+                else:
+                    baseQuery = loadQuery('update_userinfo_by_id.sql')
+    
+                    updates = []
+                    params = []
+    
+                    if len(password) > 0:
+                        updates.append('`password`=%s')
+                        epw = encrypt(password)
+                        params.append(epw)
+                    else:
+                        pass
+                    
+                    if len(updates) > 0:
+                        query = baseQuery + ' ' + ', '.join(updates) + ' WHERE `id`=%s'
+    
+                        params.append(id)
+    
+                        await cur.execute(query, tuple(params))
+                        await conn.commit() # do not forget 'await'
+    
+                        query = loadQuery('get_userinfo_by_id.sql')
+    
+                        await cur.execute(query, (id))
+                        userinfo = await cur.fetchone()   # userinfo = (...)
+    
+                        result = {"id": userinfo[0], "username": userinfo[1], "picture": userinfo[3], "last_login_at": userinfo[4]}
+                    else:
+                        result = None
+    
+        return result

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <!-- <link rel="stylesheet" href="/static/css/update_userinfo.css"> -->
+        <title>Update Userinfo</title> 
+    </head>
+    <body>
+        <div id="check_password_div">
+            <label for="check_password_input">패스워드 확인</label>
+            <input type="password" id="check_password_input">
+        </div>
+        <div id="check_password_button_div">
+            <button id="check_password_submit">확인</button>
+            <button id="check_password_cancel">취소</button>
+        </div>
+        <div id="change_password_div">
+        </div>
+        <div id="change_password_button_div">
+        </div>
+        <div id="go_home_div">
+            <a href="/home">첫 페이지로</a>
+        </div>
+    </body>
+    <script>
+        const accessToken = sessionStorage.getItem("access_token");
+        const homeURL = '/home';
+
+        // 1. check access token
+        function checkToken() {
+            if (!accessToken){
+                window.location.replace(homeURL);
+            }        
+        }
+
+        function onCancelHandler() {
+            window.location.replace(homeURL);           
+        }
+
+        // 2. verify authority
+        async function verifyUser() {
+            // 2.1. send user password
+            const checkPasswordInput = document.querySelector("#check_password_input");
+
+            const reqBody = {"password": checkPasswordInput.value};
+
+            const headers = {"Authorization": `Bearer ${accessToken}`};
+            headers["Content-Type"] = 'application/json';
+
+            console.log("/user/verifyuser.POST.headers:", headers);
+
+            let response = await fetch(
+                '/user/verifyuser'
+                , {
+                    "method": 'POST'
+                    , "headers": headers 
+                    , "body": JSON.stringify(reqBody)
+                }
+            );
+
+            let respJSON = await response.json();
+        
+            const success = respJSON["success"];
+
+            console.log('update_userinfo.html.verify_authority.success:', success);
+
+            if (success == true){
+                // 2.2. remove password check input
+                const checkPasswordDiv = document.querySelector('#check_password_div');
+                document.body.removeChild(checkPasswordDiv);
+
+                const checkPasswordButtonDiv = document.querySelector('#check_password_button_div');
+                document.body.removeChild(checkPasswordButtonDiv);
+
+                // 2.3. create new password input
+                const changePasswordDiv = document.querySelector("#change_password_div");
+
+                const changePasswordInputLabel = document.createElement("label");
+                changePasswordInputLabel.setAttribute("for", "change_password_input");
+                const changePasswordInput = document.createElement("input");
+                changePasswordInput.setAttribute("id", "change_password_input");
+                changePasswordInput.setAttribute("type", "password");
+
+                const verifyPasswordInputLabel = document.createElement("label");
+                verifyPasswordInputLabel.setAttribute("for", "verify_password_input");
+                const verifyPasswordInput = document.createElement("input");
+                verifyPasswordInput.setAttribute("id", "verify_password_input");
+                verifyPasswordInput.setAttribute("type", "password");
+                verifyPasswordInput.setAttribute("placeholder", "새 패스워드를 다시 한 번 입력");
+
+                changePasswordDiv.appendChild(changePasswordInputLabel);
+                changePasswordDiv.appendChild(changePasswordInput);
+                changePasswordDiv.appendChild(verifyPasswordInputLabel);
+                changePasswordDiv.appendChild(verifyPasswordInput);
+
+                const changePasswordButtonDiv = document.querySelector("#change_password_button_div");
+
+                const changePasswordSubmitButton = document.createElement("button");
+                changePasswordSubmitButton.setAttribute("id", "change_password_submit");
+                changePasswordSubmitButton.appendChild(document.createTextNode("확인"));
+                changePasswordSubmitButton.addEventListener('click', sendNewInfo);
+
+                const changePasswordCancelButton = document.createElement("button");
+                changePasswordCancelButton.setAttribute("id", "change_password_cancel");
+                changePasswordCancelButton.appendChild(document.createTextNode("취소"));
+                changePasswordCancelButton.addEventListener('click', onCancelHandler);
+
+                changePasswordButtonDiv.appendChild(changePasswordSubmitButton);
+                changePasswordButtonDiv.appendChild(changePasswordCancelButton);
+            }
+        }   // async function verifyUser()
+
+        // 3. send new password
+        async function sendNewInfo() {
+            const changePasswordInput = document.querySelector("#change_password_input");
+            const verifyPasswordInput = document.querySelector("#verify_password_input");
+
+            const newPassword = changePasswordInput.value;
+            const verifyPassword = verifyPasswordInput.value;
+
+            if (newPassword == verifyPassword) {
+                const headers = {"Authorization": `Bearer ${accessToken}`};
+                headers["Content-Type"] = 'application/json';
+
+                console.log("/user/updateinfo.POST.headers:", headers);
+
+                const reqBody = {"password": newPassword};
+
+                let response = await fetch(
+                    '/user/updateinfo'
+                    , {
+                        "method": 'POST'
+                        , "headers": headers 
+                        , "body": JSON.stringify(reqBody)
+                    }
+                );
+
+                let respJSON = await response.json();
+        
+                const success = respJSON["success"];
+
+                console.log('update_userinfo.html.updateinfo.respJSON:', respJSON);
+
+        // 4. logout and redirect to re-login page
+                if (success == true) {
+                   sessionStorage.removeItem("access_token");
+                   window.location.replace(homeURL);           
+                }
+            }
+        }   // async function sendNewInfo()
+
+        const checkPasswordSubmit = document.querySelector("#check_password_submit");
+        const checkPasswordCancel = document.querySelector("#check_password_cancel");
+
+        checkPasswordSubmit.addEventListener('click', verifyUser);
+        checkPasswordCancel.addEventListener('click', onCancelHandler);
+
+        window.addEventListener('load', checkToken);
+    </script>
+</html>

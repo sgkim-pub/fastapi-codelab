@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <!-- <link rel="stylesheet" href="/static/css/index.css"> -->
+        <title>Profile-Pic</title> 
+    </head>
+    <body>
+        <div id="message">
+            <p>Get profile picture</p>
+        </div>        
+        <div id="profile_pic_div">
+            <figure id="profile_pic_fig"></figure>
+        </div>
+    </body>
+    <script>
+        const accessToken = sessionStorage.getItem("access_token");
+
+        async function getProfilePic() {
+            const profilePicDiv = document.querySelector('#profile_pic_div');
+            const profilePicFig = document.querySelector('#profile_pic_fig');
+
+            const headers = {"Authorization": `Bearer ${accessToken}`};
+            headers["Content-Type"] = 'application/json';
+            
+            const reqBody = new FormData();
+
+            let response = await fetch(
+                '/user/profilepic'
+                , {
+                    "method": 'POST'
+                    , "headers": headers 
+                    , "body": JSON.stringify(reqBody)
+                }
+            );
+
+            let respJSON = await response.json();
+ 
+            console.log('get_profile_pic.html.getProfilePic().jsonResp:', respJSON);
+
+            imageURL = respJSON["profile_pic_url"]
+
+            const image = document.createElement('img');
+            image.src = imageURL;
+            profilePicFig.appendChild(image)
+        }
+
+        window.addEventListener('load', getProfilePic);
+    </script>
+</html>
