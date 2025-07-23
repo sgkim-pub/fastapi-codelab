@@ -1,6 +1,10 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
+from app.app_config import AppConfig
+
+appCfg = AppConfig('config.json')
+
 @asynccontextmanager
 async def lifespan(app):
     print('Starting FastAPI app.')
