@@ -82,14 +82,17 @@ def sendSignupPage():
 #     )
 
 # 파일이 포함된 요청의 바디를 읽는 경우
-from fastapi import UploadFile, Form, File
+from fastapi import UploadFile, Form, File, Depends
 from secrets import token_hex
 import os
 from fastapi.responses import JSONResponse
+from typing import Annotated
+from app.services.user import User
 
 @userRouter.post('/signup', status_code=201)
 async def registerUser(
-    username: str = Form(...)
+    userService: Annotated[User, Depends(User)]
+    , username: str = Form(...)
     , password: str = Form(...)
     , picture: UploadFile = File(None)
 ):
@@ -111,6 +114,8 @@ async def registerUser(
     else:
         pictureFileName = None
         newPicFileName = None
+
+    await userService.createUser(username, password, newPicFileName)
 
     respJSON = {"username": username, "password": password, "picture": pictureFileName}
 

@@ -2,3 +2,5 @@ wheel==0.45.1
 fastapi==0.116.1
 uvicorn==0.35.0
 python-multipart==0.0.20
+aiomysql==0.2.0
+bcrypt==4.3.0
