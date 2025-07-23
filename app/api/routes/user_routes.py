@@ -127,3 +127,31 @@ async def registerUser(
         content=respJSON
         , status_code=201
     )
+
+@userRouter.get('/login', status_code=200)
+def sendLoginPage():
+    return FileResponse('app/templates/signin.html')
+
+from fastapi.security import OAuth2PasswordRequestForm
+
+@userRouter.post('/login', status_code=200)
+async def authenticateUser(
+    signinUserInfo: Annotated[OAuth2PasswordRequestForm, Depends()]
+    , userService: Annotated[User, Depends(User)]
+):
+    # verify user
+    user = await userService.verifyUserByName(signinUserInfo.username, signinUserInfo.password)
+
+    # create a JWT
+    if user:
+        tokenPayload = {"id": user[0], "username": user[1], "last_login_at": user[3]}
+
+        accessToken = userService.createAccessToken(tokenPayload)
+    else:
+        accessToken = ''
+
+    return {"access_token": accessToken, "token_type": 'bearer'}    # OAuth2 specification
+
+@userRouter.get('/logout', status_code=200)
+def logoutUser():
+    return FileResponse('app/templates/logout.html')

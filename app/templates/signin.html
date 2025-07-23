@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <!-- <link rel="stylesheet" href="/static/css/login.css"> -->
+        <title>Login</title> 
+    </head>
+    <body>
+        <div id="login_input_div">
+            <label for="username_input">이름</label>
+            <input type="text" id="username_input" placeholder="이메일 주소">
+            <label for="password_input">패스워드</label>
+            <input type="password" id="password_input">
+        </div>
+        <div id="login_button_div">
+            <button id="submit_button">전송</button>
+            <button id="cancel_button">취소</button>
+        </div>
+    </body>
+    <script>
+        const homeURL = '/home';
+        const usernameInput = document.querySelector('#username_input');
+        const passwordInput = document.querySelector('#password_input');
+
+        async function sendRequest() {
+            const headers = {"Content-Type": 'application/x-www-form-urlencoded'};
+            const reqBody = new URLSearchParams(); // for 'Content-Type': 'application/x-www-form-urlencoded'
+
+            reqBody.set("username", usernameInput.value);
+            reqBody.set("password", passwordInput.value);
+            reqBody.set("grant_type", 'password'); // required by OAuth2
+
+            const response = await fetch('/user/login', 
+                {
+                    "method": 'POST'
+                    , "headers": headers
+                    , "body": reqBody.toString()
+                }
+            );
+
+            const respJSON = await response.json(); // { access_token: "your-token", token_type: "bearer" }
+            if(respJSON.access_token.length > 0){
+                sessionStorage.setItem("access_token", respJSON.access_token);
+            }
+            window.location.replace(homeURL);
+        }
+
+        const submitButton = document.querySelector('#submit_button');
+        const cancelButton = document.querySelector('#cancel_button');
+
+        submitButton.addEventListener('click', sendRequest);
+        cancelButton.addEventListener('click', () => {
+            window.location.replace(homeURL);           
+        });
+    </script>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <!-- <link rel="stylesheet" href="/static/css/logout.css"> -->
+        <title>Logout</title> 
+    </head>
+    <body>
+        <div id="logout_msg_div">
+            <p>로그아웃 되었습니다. 안녕히가세요.</p>
+        </div>
+        <div id="go_home_div">
+            <p><a href="/home">첫 페이지로</a></p>
+        </div>
+    </body>
+    <script>
+        sessionStorage.removeItem("access_token");
+        console.log('logout.html.sessionStorage.access_token:', sessionStorage.getItem("access_token"));
+    </script>
+</html>

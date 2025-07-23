@@ -4,3 +4,4 @@ uvicorn==0.35.0
 python-multipart==0.0.20
 aiomysql==0.2.0
 bcrypt==4.3.0
+python-jose==3.5.0
