@@ -144,7 +144,7 @@ async def authenticateUser(
 
     # create a JWT
     if user:
-        tokenPayload = {"id": user[0], "username": user[1], "last_login_at": user[3]}
+        tokenPayload = {"id": user[0], "username": user[1], "picture": user[3], "last_login_at": user[4]}
 
         accessToken = userService.createAccessToken(tokenPayload)
     else:
@@ -155,3 +155,81 @@ async def authenticateUser(
 @userRouter.get('/logout', status_code=200)
 def logoutUser():
     return FileResponse('app/templates/logout.html')
+
+from fastapi.security import OAuth2PasswordBearer
+from pydantic import BaseModel
+
+oauth2Scheme = OAuth2PasswordBearer(tokenUrl='/user/login')
+
+class Passwordinfo(BaseModel):
+    password: str
+
+@userRouter.post('/verifyuser', status_code=200)
+async def verifyUser(
+    token: Annotated[str, Depends(oauth2Scheme)]
+    , passwordinfo: Passwordinfo
+    , userService: Annotated[User, Depends(User)]
+): 
+    tokenInfo = userService.decodeAccessToken(token)
+    userId = tokenInfo["id"]
+
+    userInfo = await userService.verifyUserById(userId, passwordinfo.password)
+
+    if userInfo is not None:
+        jsonResp = {"success": True, "content": ''}
+    else:
+        jsonResp = {"success": False, "content": ''}
+
+    return JSONResponse(
+        content=jsonResp
+        , status_code=200
+    )
+
+@userRouter.post('/updateinfo', status_code=200)
+async def updateUserinfo(
+    token: Annotated[str, Depends(oauth2Scheme)]
+    , userinfo: Passwordinfo
+    , userService: Annotated[User, Depends(User)]
+):
+    tokenInfo = userService.decodeAccessToken(token)
+
+    result = await userService.updateUserinfo(userinfo.password, tokenInfo["id"])
+
+    if result is not None:
+        jsonResp = {"success": True, "content": ''}
+    else:
+        jsonResp = {"success": False, "content": ''}
+
+    return JSONResponse(
+        content=jsonResp
+        , status_code=200
+    )
+
+@userRouter.get('/updateinfo', status_code=200)
+def sendUpdateUserinfoPage():
+    return FileResponse('app/templates/update_userinfo.html')
+
+@userRouter.get('/profilepic', status_code=200)
+def sendProfilePicPage():
+    return FileResponse('app/templates/get_profile_pic.html')
+
+from fastapi.requests import Request
+
+@userRouter.post('/profilepic', status_code=200)
+async def sendProfilePicUrl(
+    token: Annotated[str, Depends(oauth2Scheme)]
+    , userService: Annotated[User, Depends(User)]
+    , request: Request
+    ):
+    print('user_routes.py.sendProfilePicUrl.token:', token)
+
+    tokenInfo = userService.decodeAccessToken(token)
+    
+    print('user_routes.py.sendProfilePicUrl.tokenInfo:', tokenInfo)
+
+    fileName = tokenInfo["picture"]
+
+    imageURL = request.url_for('profile-pic', path=fileName)    # alias name, additional path
+    print('user_routes.py.sendProfilePicUrl.imageURL:', imageURL)
+
+    return JSONResponse(content={"profile_pic_url": str(imageURL)})
