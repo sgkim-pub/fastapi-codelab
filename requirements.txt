@@ -9,3 +9,4 @@ cryptography==45.0.5
 celery==5.5.3
 SQLAlchemy==2.0.41
 mysqlclient==2.2.7
+websockets==15.0.1
