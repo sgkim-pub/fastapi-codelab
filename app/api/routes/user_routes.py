@@ -239,7 +239,60 @@ def sendResetPwPage():
     return FileResponse('app/templates/resetpw.html')
 
 from app.utils.mail import sendMail
-from fastapi import BackgroundTasks
+# from fastapi import BackgroundTasks
+
+# class EmailAddress(BaseModel):
+#     email: str
+
+# @userRouter.post('/resetpw', status_code=200)
+# async def resetAndSendPw(
+#     emailAddress: EmailAddress
+#     , userService: Annotated[User, Depends(User)]
+#     , bgTask: BackgroundTasks
+# ):
+#     # 1. get email address
+#     email = emailAddress.email
+#     print("user_routes.py.resetAndSendPw().email:", email)
+
+#     # 2. verify email address
+#     userinfo = await userService.getUserinfoByUsername(email)
+
+#     print("user_routes.py.resetAndSendPw().userinfo:", userinfo)
+
+#     if userinfo is not None:
+#     # 3. generate a temporary password
+#         tempPW = await userService.generateTemporaryPassword(userinfo[0]) 
+
+#         print("user_routes.py.resetAndSendPw().tempPW", tempPW)
+
+#     # 4. send the temporary password via email
+#         title = "임시 패스워드"
+#         message = """
+#         임시 패스워드: {}
+#         """.format(tempPW)
+
+#     # 4-a. using blocking method
+#         # sendMail("your_mail_account@gmail.com", email, title, message)
+
+#     # 4-b. using FastAPI's BackgroundTasks component
+#         print("send email using FastAPI's BackgroundTasks.")
+#         bgTask.add_task(sendMail, "your_mail_account@gmail.com", email, title, message)
+
+#         jsonResp = {"success": True, "content": ''}
+
+#         return JSONResponse(
+#             content=jsonResp
+#             , status_code=200
+#         )
+#     else: # no corresponding user
+#         jsonResp = {"success": False, "content": ''}
+
+#         return JSONResponse(
+#             content=jsonResp
+#             , status_code=200
+#         )
+
+from app.utils.messaging import SendEmailCeleryTask
 
 class EmailAddress(BaseModel):
     email: str
@@ -248,7 +301,7 @@ class EmailAddress(BaseModel):
 async def resetAndSendPw(
     emailAddress: EmailAddress
     , userService: Annotated[User, Depends(User)]
-    , bgTask: BackgroundTasks
+    # , bgTask: BackgroundTasks
 ):
     # 1. get email address
     email = emailAddress.email
@@ -275,8 +328,14 @@ async def resetAndSendPw(
         # sendMail("your_mail_account@gmail.com", email, title, message)
 
     # 4-b. using FastAPI's BackgroundTasks component
-        print("send email using FastAPI's BackgroundTasks.")
-        bgTask.add_task(sendMail, "your_mail_account@gmail.com", email, title, message)
+        # print("send email using FastAPI's BackgroundTasks.")
+        # bgTask.add_task(sendMail, "your_mail_account@gmail.com", email, title, message)
+
+    # 4-c. using Celery and RabbitMQ
+        print("send email using Celery and RabbitMQ.")
+        task = SendEmailCeleryTask().delay("your_mail_account@gmail.com", email, title, message)
+        result = task.get()
+        print("Celery task result:", result)
 
         jsonResp = {"success": True, "content": ''}
 

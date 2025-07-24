@@ -6,3 +6,6 @@ aiomysql==0.2.0
 bcrypt==4.3.0
 python-jose==3.5.0
 cryptography==45.0.5
+celery==5.5.3
+SQLAlchemy==2.0.41
+mysqlclient==2.2.7
