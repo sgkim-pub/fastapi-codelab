@@ -66,6 +66,9 @@ app = FastAPI(lifespan=lifespan)
 from fastapi.staticfiles import StaticFiles
 app.mount('/static/profile/pic', StaticFiles(directory='app/upload/user_profile'), name='profile-pic')
 
+from app.services.middleware import refreshTokenTime
+app.middleware('http')(refreshTokenTime)
+
 from app.api.routes.home_routes import homeRouter
 app.include_router(homeRouter)
 

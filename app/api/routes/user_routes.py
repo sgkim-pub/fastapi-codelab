@@ -134,6 +134,9 @@ def sendLoginPage():
 
 from fastapi.security import OAuth2PasswordRequestForm
 
+# 미들웨어를 이용한 토큰 만료시간 업데이트를 위한 코드
+from datetime import timedelta
+
 @userRouter.post('/login', status_code=200)
 async def authenticateUser(
     signinUserInfo: Annotated[OAuth2PasswordRequestForm, Depends()]
@@ -146,7 +149,10 @@ async def authenticateUser(
     if user:
         tokenPayload = {"id": user[0], "username": user[1], "picture": user[3], "last_login_at": user[4]}
 
-        accessToken = userService.createAccessToken(tokenPayload)
+        # accessToken = userService.createAccessToken(tokenPayload)
+
+        # 미들웨어를 이용한 토큰 만료시간 업데이트를 위한 코드
+        accessToken = userService.createAccessToken(tokenPayload, duration=timedelta(seconds=20))
     else:
         accessToken = ''
 
