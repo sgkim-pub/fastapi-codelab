@@ -5,6 +5,8 @@ from app.utils.crypto import encrypt, verify
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
 
+import secrets
+
 class User():
     def __init__(self):
         from app import pool
@@ -131,3 +133,29 @@ class User():
                         result = None
     
         return result
+    
+    async def generateTemporaryPassword(self, userId):
+        tempPW = secrets.token_hex(4)   # 4 bytes. 8 characters.
+        encryptedPW = encrypt(tempPW)
+    
+        async with self.pool.acquire() as conn:
+            async with conn.cursor() as cur:
+                baseQuery = loadQuery("update_userinfo_by_id.sql")
+    
+                query = baseQuery + " " + "`password`=%s" + " WHERE `id`=%s"
+    
+                await cur.execute(query, (encryptedPW, userId))
+                await conn.commit()
+    
+        return tempPW
+
+    async def getUserinfoByUsername(self, username):
+        query = loadQuery("get_userinfo_by_username.sql")
+
+        async with self.pool.acquire() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute(query, (username))
+                userinfo = await cur.fetchone()
+
+        # (id, username, password, picture, last_login_at)
+        return userinfo

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="/static/css/index.css">
+        <title>Reset Password</title> 
+    </head>
+    <body>
+        <div id="email_input_div">
+            <label id="email_input_label" for="email_input">이메일 주소 입력</label>
+            <input id="email_input" placeholder="등록된 이메일 주소를 입력해주세요.">
+        </div>
+        <div id="resetpw_message_div"></div>
+        <div id="resetpw_button_div">
+            <button id="send_email_address_button">확인</button>
+            <button id="cancel_resetpw_button">취소</button>
+        </div>
+    </body>
+    <script>
+        const emailInputDiv = document.querySelector("#email_input_div");
+        const resetpwMessageDiv = document.querySelector("#resetpw_message_div");
+        const resetpwButtonDiv = document.querySelector("#resetpw_button_div");
+        const sendEmailAddressButton = document.querySelector("#send_email_address_button");
+        const cancelResetPWButton = document.querySelector("#cancel_resetpw_button");
+
+        const homeURL = "/home";
+
+        async function sendEmailAddress() {
+            const emailInput = document.querySelector("#email_input");
+
+            if (emailInput) {
+                const headers = {"Content-Type": "application/json"};
+                const reqBody = {"email": emailInput.value}
+
+                const response = await fetch(
+                    '/user/resetpw'
+                    , {
+                        "method": "POST"
+                        , "headers": headers
+                        , "body": JSON.stringify(reqBody)
+                    }
+                );
+
+                const respJSON = await response.json();
+
+                if (respJSON["success"] == true) {
+                    const emailInputLabel = document.querySelector("#email_input_label");
+                    emailInputDiv.removeChild(emailInputLabel);
+                    emailInputDiv.removeChild(emailInput);
+                    resetpwButtonDiv.removeChild(sendEmailAddressButton);
+                    resetpwButtonDiv.removeChild(cancelResetPWButton);
+
+                    const pwResetMessageP = document.createElement("p");
+                    pwResetMessageP.setAttribute("id", "pw_reset_message_p");
+                    pwResetMessageP.appendChild(document.createTextNode("임시 패스워드가 입력하신 이메일 주소로 전달되었습니다."));
+
+                    emailInputDiv.appendChild(pwResetMessageP);
+
+                    const goHomeA = document.createElement("a");
+                    goHomeA.setAttribute("id", "go_home_a");
+                    goHomeA.setAttribute("href", "/home");
+                    goHomeA.appendChild(document.createTextNode("첫 페이지로"));
+
+                    resetpwButtonDiv.appendChild(goHomeA);
+                }
+            }
+        }   // async function sendEmailAddress()
+
+        function cancelResetPW() {
+            window.location.replace(homeURL);
+        }
+
+        sendEmailAddressButton.addEventListener('click', sendEmailAddress);
+        cancelResetPWButton.addEventListener('click', cancelResetPW)
+    </script>
+</html>

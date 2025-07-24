@@ -5,3 +5,4 @@ python-multipart==0.0.20
 aiomysql==0.2.0
 bcrypt==4.3.0
 python-jose==3.5.0
+cryptography==45.0.5

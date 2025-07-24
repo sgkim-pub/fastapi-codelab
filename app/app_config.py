@@ -13,3 +13,4 @@ class AppConfig():
         self.DB_PASSWORD = self.config.get("DB_PASSWORD")
         self.JWT_SECRET = self.config.get("JWT_SECRET")
         self.JWT_ALGORITHM = self.config.get("JWT_ALGORITHM")
+        self.MAIL_APP_PASSWORD = self.config.get("MAIL_APP_PASSWORD")

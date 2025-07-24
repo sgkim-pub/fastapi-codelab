@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Test bg task</title>
+    </head>
+    <body>
+        <div id="test_bg_task_input_div">
+            <label for="task_id_input">작업 번호 입력</label>
+            <input type="text" id="task_id_input">
+        </div>
+        <div id="test_bg_task_button_div">
+            <button id="submit_button">제출</button>
+        </div>
+        <div id="goto_home_div">
+            <a href="/home">첫 페이지로</a>
+        </div>
+    </body>
+    <script>
+        const taskIdInputE = document.querySelector('#task_id_input');
+        const submitBtn = document.querySelector('#submit_button');
+
+        async function sendTaskId(taskId) {
+            const headers = {"Content-Type": 'application/json'};
+            const jsonData = {"taskId": parseInt(taskId)};
+
+            const response = await fetch(
+                '/bgtask'
+                , {
+                    "method": 'POST'
+                    , "headers": headers
+                    , "body": JSON.stringify(jsonData)
+                }
+            );
+
+            const respJSON = await response.json();
+
+            console.log('bg_test.html.sendTaskId.respJSON["message"]:', respJSON["message"]);
+        }
+
+        submitBtn.addEventListener('click', () => {
+            sendTaskId(parseInt(taskIdInputE.value));
+        });
+    </script>
+</html>
